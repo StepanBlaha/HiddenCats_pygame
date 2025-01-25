@@ -40,7 +40,7 @@ class hiddencats:
             {"clicked": False, "position": (1013, 645), "dimension": (12, 20), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
             {"clicked": False, "position": (1294, 648), "dimension": (30, 21), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
             {"clicked": False, "position": (1394, 770), "dimension": (30, 22), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
-            {"clicked": True, "position": (914, 898), "dimension": (16, 17), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
+            {"clicked": False, "position": (914, 898), "dimension": (16, 17), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
             {"clicked": False, "position": (1362, 418), "dimension": (29, 22), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
         ]
         self.collision_box_border_color = (0, 0, 0)
