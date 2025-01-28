@@ -1,5 +1,6 @@
 #pip install pygame
 import pygame, sys
+from main_menu import gamemenu
 
 
 class hiddencats:
@@ -58,6 +59,7 @@ class hiddencats:
             
               
     def run(self):
+        yield self.GAMEWINDOW
         """
         The main game loop. Handles events like window resizing and mouse clicks.
         """
@@ -151,4 +153,6 @@ class hiddencats:
         
         
 if __name__ == '__main__':
-    hiddencats().run()
+    game = hiddencats()
+    menu = gamemenu(game)
+    menu.run()
