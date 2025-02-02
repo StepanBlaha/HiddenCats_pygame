@@ -54,36 +54,168 @@ class hiddencats:
         self.image = pygame.transform.scale(self.image, (self.window_width, self.window_height))
         self.GAMEWINDOW = pygame.display.set_mode((self.window_width, self.window_height), pygame.RESIZABLE) 
         self.GAMEWINDOW.fill(self.window_color)
-        self.create_image(self.window_width, self.window_height)
-        self.create_collision_boxes(self.window_width, self.window_height)
+        
         self.font = pygame.font.Font(None, 75)
         self.clicked_cats = []
         self.text = ""
+        self.stage =  "menu"
         
-            
-              
-    def run(self):
+    def create_button(self, text, rect, color, action):
         """
-        The main game loop. Handles events like window resizing and mouse clicks.
+        Creates a button with given properties.
+        
+        Parameters:
+        text (str): The text displayed on the button.
+        rect (tuple): A tuple (x, y, width, height) defining the button's position and size.
+        color (str): The color of the button.
+        action (function): The function executed when the button is clicked.
+        
+        Returns:
+        list: A list containing button attributes.
         """
-        while True:
-            text = self.font.render("start", True, "red")
-            
-            self.GAMEWINDOW.blit(text, [115, 40])
+        #Create button rectangle
+        button_rect = pygame.Rect(rect)
+        #Create text to be put into button
+        button_text = self.font.render(text, True, "black")
+        #Rectangle with the text
+        text_rect = button_text.get_rect(center=button_rect.center)
+        return [button_text, text_rect, button_rect, color, action, False]
+    
+    def button_check(self, info, event):
+        """
+        Checks for button interaction (hover and click).
+        
+        Parameters:
+        info (list): The button's attribute list.
+        event (pygame.event.Event): The event to check.
+        """
+        #Get the button info
+        button_text, text_rect, button_rect, color, action, hover = info
+        
+        #Checks for mouse motion
+        if event.type == pygame.MOUSEMOTION:
+            #If mouse motion colides with the rectangle sets hover to true
+            info[-1] =  button_rect.collidepoint(event.pos)
+        
+        #Checks for mouse down
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            #If hover is true and action is set, runs the action
+            if hover and action:
+                action()
+        
+    def button_draw(self, screen, info):
+        """
+        Draws a button on the screen.
+        
+        Parameters:
+        screen (pygame.Surface): The game window surface.
+        info (list): The button's attribute list.
+        """
+        #Get the button info
+        button_text, text_rect, button_rect, color, action, hover = info
+        #Draw the button
+        pygame.draw.rect(self.GAMEWINDOW, color, button_rect )
+        #Draw the text into the button
+        self.GAMEWINDOW.blit(button_text, text_rect)
+        
+    def on_click_start_game(self):
+        """Handles the start game button click event."""
+        self.stage = "game"
+        print("Accessed game")
+    
+    def on_click_options(self):
+        """Handles the options button click event."""
+        self.stage = "options"
+        print("Accessed options")
+        
+    def on_click_menu(self):
+        """Handles the menu button click event."""
+        self.stage = "menu"
+        print("Accessed menu")
+        
+    def initialize_menu_buttons(self):
+        """
+        Creates and returns menu buttons.
+        
+        Returns:
+        list: A list containing the menu buttons.
+        """
+        #Dynamic centering
+        centeredWidth = ( self.window_width / 2 ) - 100
+        #Creates the buttons
+        button_start = self.create_button("GAME", (centeredWidth, 100, 200, 75), "red", self.on_click_start_game)
+        button_options = self.create_button("OPTIONS", (centeredWidth - 50, 200, 300, 75), "red", self.on_click_options)
+        return [button_start, button_options]
+    
+    def initialize_game_buttons(self):
+        """
+        Creates and returns the game screen buttons.
+        
+        Returns:
+        list: The menu button.
+        """
+        #Dynamic centering
+        centeredWidth = self.window_width - 170
+        #Creates the menu button
+        button_menu =  self.create_button("Menu", (centeredWidth, 30, 150, 75), "red", self.on_click_menu)
+        return button_menu
+        
+    def create_menu(self):
+        """
+        Creates and runs the menu screen, handling events and rendering buttons.
+        """
+        #Setup the buttons
+        button_start, button_options = self.initialize_menu_buttons()
+        while True:   
+            #Checks for quiting the game
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
                     pygame.quit()
                     #For exiting the window
                     sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                   break
-            break
+                
+                #If stage == menu checks for colisions with the buttons
+                if self.stage == "menu":
+                    self.button_check(button_start, event)
+                    self.button_check(button_options, event)
+                    
+                #Check for resize
+                if event.type == pygame.VIDEORESIZE:
+                    button_start, button_options = self.initialize_menu_buttons()
+                    self.create_window(event.w, event.h)
+                    self.create_collision_boxes(event.w, event.h)
+
+            #If stage == menu draws the buttons 
+            self.GAMEWINDOW.fill("white")
+            if self.stage == "menu":
+                self.button_draw(self.GAMEWINDOW, button_start)
+                self.button_draw(self.GAMEWINDOW, button_options)
+                
+            #If stage is changed to game, draws the game
+            elif self.stage == "game":
+                self.create_game()
             pygame.display.update() 
-        while True:  
-            widthOffset = self.window_width - 100
+                
+    def create_game(self):
+        """
+        Creates and runs the game screen, handling events, rendering the counter, and drawing buttons.
+        """
+        #Setup the menu button
+        button_menu = self.initialize_game_buttons()
+        #Initial game setup
+        self.create_image(self.window_width, self.window_height)
+        self.create_collision_boxes(self.window_width, self.window_height)
+        self.create_window(self.window_width, self.window_height)
+        self.create_collision_boxes(self.window_width, self.window_height)
+        while True:
+            #Offsets for centering the counter
+            widthOffset = self.window_width - 240
             heightOffset = 50
+            #Draw the rectangle behind counter
             pygame.draw.rect(self.GAMEWINDOW, "white", (widthOffset, heightOffset, 80, 50))
+            #Sets the counter text
             self.text = self.font.render(str(len(self.clicked_cats)), True, "red")
+            #Draws the counter
             self.GAMEWINDOW.blit(self.text, [widthOffset, heightOffset])
             
             for event in pygame.event.get(): 
@@ -91,15 +223,46 @@ class hiddencats:
                     pygame.quit()
                     #For exiting the window
                     sys.exit()
-                    
+                
+                #If stage == game checks for colisions with the menu button
+                if self.stage == "game":
+                    self.button_check(button_menu, event)
+                
+                #Check for resize
                 if event.type == pygame.VIDEORESIZE:
+                    button_menu = self.initialize_game_buttons()
                     self.create_window(event.w, event.h)
                     self.create_collision_boxes(event.w, event.h)
                     
+                #Check for mousedown
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    #Get mouse position
                     x, y =pygame.mouse.get_pos()
+                    #Check for colisions
                     self.check_for_collisions(x, y)
+            
+            #If stage == game draws the menu button
+            if self.stage == "game":
+                self.button_draw(self.GAMEWINDOW, button_menu)
+                
+            #If stage is changed to menu, draws the menu
+            elif self.stage == "menu":
+                self.create_menu()
             pygame.display.update() 
+
+              
+    def run(self):
+        """
+        Runs the game by launching the appropriate stage.
+        """
+        #Run the currrent stage
+        if self.stage =="menu":
+            self.create_menu()
+        elif self.stage == "game":
+            self.create_game()
+        
+        
+        
         
     def create_window(self, width, height):
         """
@@ -126,18 +289,18 @@ class hiddencats:
         """
         for i in range( len(self.collision_box_list)):
             
-                height_scale = height / self.initial_window_height
-                width_scale = width / self.initial_window_width
-                
-                scaled_position = (self.collision_box_list[i]["position"][0] * width_scale , self.collision_box_list[i]["position"][1] * height_scale)
-                scaled_dimension = (self.collision_box_list[i]["dimension"][0] * width_scale , self.collision_box_list[i]["dimension"][1] * height_scale)
-                
-                self.collision_box_list[i]["scaled_position"] = scaled_position
-                self.collision_box_list[i]["scaled_dimension"] = scaled_dimension
-                
-                collision_box = pygame.Rect(scaled_position, scaled_dimension)
-                if self.collision_box_list[i]["clicked"] == True:
-                    pygame.draw.rect(self.GAMEWINDOW, self.collision_box_border_color, collision_box, 4)
+            height_scale = height / self.initial_window_height
+            width_scale = width / self.initial_window_width
+            
+            scaled_position = (self.collision_box_list[i]["position"][0] * width_scale , self.collision_box_list[i]["position"][1] * height_scale)
+            scaled_dimension = (self.collision_box_list[i]["dimension"][0] * width_scale , self.collision_box_list[i]["dimension"][1] * height_scale)
+            
+            self.collision_box_list[i]["scaled_position"] = scaled_position
+            self.collision_box_list[i]["scaled_dimension"] = scaled_dimension
+            
+            collision_box = pygame.Rect(scaled_position, scaled_dimension)
+            if self.collision_box_list[i]["clicked"] == True:
+                pygame.draw.rect(self.GAMEWINDOW, self.collision_box_border_color, collision_box, 4)
                 
         
     def create_image(self, width, height):
