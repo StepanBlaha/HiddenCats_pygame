@@ -56,14 +56,36 @@ class hiddencats:
         self.GAMEWINDOW.fill(self.window_color)
         self.create_image(self.window_width, self.window_height)
         self.create_collision_boxes(self.window_width, self.window_height)
+        self.font = pygame.font.Font(None, 75)
+        self.clicked_cats = []
+        self.text = ""
+        
             
               
     def run(self):
-        yield self.GAMEWINDOW
         """
         The main game loop. Handles events like window resizing and mouse clicks.
         """
+        while True:
+            text = self.font.render("start", True, "red")
+            
+            self.GAMEWINDOW.blit(text, [115, 40])
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT: 
+                    pygame.quit()
+                    #For exiting the window
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                   break
+            break
+            pygame.display.update() 
         while True:  
+            widthOffset = self.window_width - 100
+            heightOffset = 50
+            pygame.draw.rect(self.GAMEWINDOW, "white", (widthOffset, heightOffset, 80, 50))
+            self.text = self.font.render(str(len(self.clicked_cats)), True, "red")
+            self.GAMEWINDOW.blit(self.text, [widthOffset, heightOffset])
+            
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
                     pygame.quit()
@@ -145,6 +167,8 @@ class hiddencats:
             collision_box = pygame.Rect(scaled_position, scaled_dimension)
             if collision_box.collidepoint(x, y):
                 print("Collision detected with box", i)
+                if i not in self.clicked_cats:
+                    self.clicked_cats.append(i)
                 self.collision_box_list[i]["clicked"] = True
                 # Highlight the clicked box
                 pygame.draw.rect(self.GAMEWINDOW, self.collision_box_border_color, collision_box, 4)
@@ -154,5 +178,4 @@ class hiddencats:
         
 if __name__ == '__main__':
     game = hiddencats()
-    menu = gamemenu(game)
-    menu.run()
+    game.run()
