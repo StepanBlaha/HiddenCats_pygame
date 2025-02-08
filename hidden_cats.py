@@ -252,6 +252,10 @@ class hiddencats:
         print("gameover shown")
         #Setup the replay button
         play_again_button, menu_button = self.initialize_play_again_button()
+        win_font = pygame.font.Font(None, 140)
+        centeredWidth = ( self.window_width / 2 ) - 200
+        win_text = win_font.render(f"You won", True, self.button_color)
+        self.GAMEWINDOW.blit(win_text, (centeredWidth, 150))
         while True:
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
