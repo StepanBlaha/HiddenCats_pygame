@@ -1,7 +1,7 @@
 #pip install pygame
+import random
+import  os
 import pygame, sys
-from main_menu import gamemenu
-
 
 class hiddencats:
     """
@@ -45,6 +45,7 @@ class hiddencats:
             {"clicked": False, "position": (1362, 418), "dimension": (29, 22), "scaled_dimension": (0, 0), "scaled_position": (0, 0)},
         ]
         self.collision_box_border_color = (0, 0, 0)
+        self.cat_sound_list = ["meow_1.wav", "meow_2.wav",  "meow_3.wav",  "meow_4.wav",  "meow_5.wav",  "meow_6.wav"]
         self.window_color = (255, 255, 255)
         self.window_height = 900
         self.window_width = 1600
@@ -59,6 +60,18 @@ class hiddencats:
         self.clicked_cats = []
         self.text = ""
         self.stage =  "menu"
+        
+    def play_sound(self):
+        random_index = random.randint(0, len(self.cat_sound_list) - 1)
+        print(random_index)
+        random_sound = self.cat_sound_list[random_index]
+        sound_folder_path = "assets/cat_sounds"
+        complete_path = os.path.join(sound_folder_path, random_sound)
+        
+        pygame.mixer.init()
+        pygame.mixer.music.load(complete_path)
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play()
         
     def create_button(self, text, rect, color, action):
         """
@@ -133,6 +146,19 @@ class hiddencats:
         self.stage = "menu"
         print("Accessed menu")
         
+    def on_click_replay_game(self):
+        #Reset clicked boxes
+        for box in self.collision_box_list:
+            box["clicked"] = False
+        self.stage = "game"
+        print("Game restarted")
+        pygame.display.update()
+        
+    def on_game_win(self):
+         # Refresh to apply changes
+        self.stage = "gameover"
+        print("Game won")
+        
     def initialize_menu_buttons(self):
         """
         Creates and returns menu buttons.
@@ -159,6 +185,13 @@ class hiddencats:
         #Creates the menu button
         button_menu =  self.create_button("Menu", (centeredWidth, 30, 150, 75), "red", self.on_click_menu)
         return button_menu
+    
+    def initialize_play_again_button(self):
+        #Dynamic centering
+        centeredWidth = ( self.window_width / 2 ) - 100
+        #Creates the play again button
+        play_again_button =  self.create_button("Replay", (centeredWidth, 300, 200, 75), "red", self.on_click_replay_game)
+        return play_again_button
         
     def create_menu(self):
         """
@@ -195,42 +228,36 @@ class hiddencats:
             elif self.stage == "game":
                 self.create_game()
             pygame.display.update() 
-                
-    def create_game(self):
-        """
-        Creates and runs the game screen, handling events, rendering the counter, and drawing buttons.
-        """
-        #Setup the menu button
-        button_menu = self.initialize_game_buttons()
-        #Initial game setup
-        self.create_image(self.window_width, self.window_height)
-        self.create_collision_boxes(self.window_width, self.window_height)
-        self.create_window(self.window_width, self.window_height)
-        self.create_collision_boxes(self.window_width, self.window_height)
+    
+    def create_win_screen(self):
+        
+        self.clicked_cats = []
+        surface = pygame.Surface((self.window_width, self.window_height))
+        surface.set_alpha(180)
+        surface.fill((255, 255, 255))
+        
+        self.GAMEWINDOW.blit(surface,  (0,  0)) # Paint the screen white
+        
+        
+        
+        
+        print("gameover shown")
+        #Setup the replay button
+        play_again_button = self.initialize_play_again_button()
         while True:
-            #Offsets for centering the counter
-            widthOffset = self.window_width - 240
-            heightOffset = 50
-            #Draw the rectangle behind counter
-            pygame.draw.rect(self.GAMEWINDOW, "white", (widthOffset, heightOffset, 80, 50))
-            #Sets the counter text
-            self.text = self.font.render(str(len(self.clicked_cats)), True, "red")
-            #Draws the counter
-            self.GAMEWINDOW.blit(self.text, [widthOffset, heightOffset])
-            
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
                     pygame.quit()
                     #For exiting the window
                     sys.exit()
                 
-                #If stage == game checks for colisions with the menu button
-                if self.stage == "game":
-                    self.button_check(button_menu, event)
+                
+                if self.stage == "gameover":
+                    self.button_check(play_again_button, event)
                 
                 #Check for resize
                 if event.type == pygame.VIDEORESIZE:
-                    button_menu = self.initialize_game_buttons()
+                    play_again_button = self.initialize_play_again_button()
                     self.create_window(event.w, event.h)
                     self.create_collision_boxes(event.w, event.h)
                     
@@ -242,8 +269,79 @@ class hiddencats:
                     self.check_for_collisions(x, y)
             
             #If stage == game draws the menu button
+                
+            if self.stage == "gameover":
+                self.button_draw(self.GAMEWINDOW, play_again_button)
+            elif self.stage == "game":
+                self.create_game()
+            pygame.display.update()
+        
+                
+    def create_game(self):
+        """
+        Creates and runs the game screen, handling events, rendering the counter, and drawing buttons.
+        """
+        #Setup the replay button
+        play_again_button = self.initialize_play_again_button()
+        #Setup the menu button
+        button_menu = self.initialize_game_buttons()
+        #Initial game setup
+        print(self.clicked_cats)
+        self.GAMEWINDOW.fill(self.window_color)
+        pygame.display.update() 
+        self.create_image(self.window_width, self.window_height)
+        self.create_collision_boxes(self.window_width, self.window_height)
+        self.create_window(self.window_width, self.window_height)
+        self.create_collision_boxes(self.window_width, self.window_height)
+        while True:
+            #Offsets for centering the counter
+            widthOffset = self.window_width - 330
+            heightOffset = 50
+            #Draw the rectangle behind counter
+            pygame.draw.rect(self.GAMEWINDOW, "white", (widthOffset, heightOffset, 140, 50))
+            #Gets the number of clicked  cats
+            clicked_counter = len(self.clicked_cats)
+            #Sets the counter text
+            self.text = self.font.render(f"{clicked_counter}/15", True, "red")
+            #Draws the counter
+            self.GAMEWINDOW.blit(self.text, (widthOffset, heightOffset))
+            
+            if clicked_counter == 15:
+                self.on_game_win()
+               
+               
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT: 
+                    pygame.quit()
+                    #For exiting the window
+                    sys.exit()
+                
+                #If stage == game checks for colisions with the menu button
+                if self.stage == "game":
+                    self.button_check(button_menu, event)
+                
+                if self.stage == "gameover":
+                    self.button_check(play_again_button, event)
+                
+                #Check for resize
+                if event.type == pygame.VIDEORESIZE:
+                    button_menu = self.initialize_game_buttons()
+                    play_again_button = self.initialize_play_again_button()
+                    self.create_window(event.w, event.h)
+                    self.create_collision_boxes(event.w, event.h)
+                    
+                #Check for mousedown
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    #Get mouse position
+                    x, y =pygame.mouse.get_pos()
+                    #Check for colisions
+                    self.check_for_collisions(x, y)
+            #If stage == game draws the menu button
             if self.stage == "game":
                 self.button_draw(self.GAMEWINDOW, button_menu)
+                
+            elif self.stage == "gameover":
+                self.create_win_screen()
                 
             #If stage is changed to menu, draws the menu
             elif self.stage == "menu":
@@ -260,6 +358,8 @@ class hiddencats:
             self.create_menu()
         elif self.stage == "game":
             self.create_game()
+        elif self.stage  == "gameover":
+            self.create_win_screen()
         
         
         
@@ -332,6 +432,7 @@ class hiddencats:
                 print("Collision detected with box", i)
                 if i not in self.clicked_cats:
                     self.clicked_cats.append(i)
+                    self.play_sound()
                 self.collision_box_list[i]["clicked"] = True
                 # Highlight the clicked box
                 pygame.draw.rect(self.GAMEWINDOW, self.collision_box_border_color, collision_box, 4)
