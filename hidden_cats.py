@@ -49,6 +49,8 @@ class hiddencats:
         self.window_color = (255, 255, 255)
         self.window_height = 900
         self.window_width = 1600
+        self.button_color = "black"
+        self.button_text_color = "white"
         self.image = pygame.image.load("assets/Prosek.png")
         self.initial_window_height = self.image.get_size()[1]
         self.initial_window_width = self.image.get_size()[0]
@@ -89,7 +91,7 @@ class hiddencats:
         #Create button rectangle
         button_rect = pygame.Rect(rect)
         #Create text to be put into button
-        button_text = self.font.render(text, True, "black")
+        button_text = self.font.render(text, True, self.button_text_color)
         #Rectangle with the text
         text_rect = button_text.get_rect(center=button_rect.center)
         return [button_text, text_rect, button_rect, color, action, False]
@@ -127,24 +129,29 @@ class hiddencats:
         #Get the button info
         button_text, text_rect, button_rect, color, action, hover = info
         #Draw the button
-        pygame.draw.rect(self.GAMEWINDOW, color, button_rect )
+        pygame.draw.rect(self.GAMEWINDOW, color, button_rect , 0, 5)
         #Draw the text into the button
         self.GAMEWINDOW.blit(button_text, text_rect)
         
     def on_click_start_game(self):
         """Handles the start game button click event."""
+        for box in self.collision_box_list:
+            box["clicked"] = False
         self.stage = "game"
         print("Accessed game")
+        pygame.display.update()
     
     def on_click_options(self):
         """Handles the options button click event."""
         self.stage = "options"
         print("Accessed options")
+        pygame.display.update()
         
     def on_click_menu(self):
         """Handles the menu button click event."""
         self.stage = "menu"
         print("Accessed menu")
+        pygame.display.update()
         
     def on_click_replay_game(self):
         #Reset clicked boxes
@@ -169,8 +176,8 @@ class hiddencats:
         #Dynamic centering
         centeredWidth = ( self.window_width / 2 ) - 100
         #Creates the buttons
-        button_start = self.create_button("GAME", (centeredWidth, 100, 200, 75), "red", self.on_click_start_game)
-        button_options = self.create_button("OPTIONS", (centeredWidth - 50, 200, 300, 75), "red", self.on_click_options)
+        button_start = self.create_button("GAME", (centeredWidth, 100, 200, 75), self.button_color, self.on_click_start_game)
+        button_options = self.create_button("OPTIONS", (centeredWidth - 50, 200, 300, 75), self.button_color, self.on_click_options)
         return [button_start, button_options]
     
     def initialize_game_buttons(self):
@@ -183,15 +190,16 @@ class hiddencats:
         #Dynamic centering
         centeredWidth = self.window_width - 170
         #Creates the menu button
-        button_menu =  self.create_button("Menu", (centeredWidth, 30, 150, 75), "red", self.on_click_menu)
+        button_menu =  self.create_button("Menu", (centeredWidth, 30, 150, 75), self.button_color, self.on_click_menu)
         return button_menu
     
     def initialize_play_again_button(self):
         #Dynamic centering
         centeredWidth = ( self.window_width / 2 ) - 100
         #Creates the play again button
-        play_again_button =  self.create_button("Replay", (centeredWidth, 300, 200, 75), "red", self.on_click_replay_game)
-        return play_again_button
+        play_again_button =  self.create_button("Replay", (centeredWidth, 300, 200, 75), self.button_color, self.on_click_replay_game)
+        menu_button = self.create_button("Menu", (centeredWidth, 400, 200, 75), self.button_color, self.on_click_menu)
+        return [ play_again_button, menu_button ]
         
     def create_menu(self):
         """
@@ -243,7 +251,7 @@ class hiddencats:
         
         print("gameover shown")
         #Setup the replay button
-        play_again_button = self.initialize_play_again_button()
+        play_again_button, menu_button = self.initialize_play_again_button()
         while True:
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
@@ -254,6 +262,7 @@ class hiddencats:
                 
                 if self.stage == "gameover":
                     self.button_check(play_again_button, event)
+                    self.button_check(menu_button, event)
                 
                 #Check for resize
                 if event.type == pygame.VIDEORESIZE:
@@ -272,8 +281,11 @@ class hiddencats:
                 
             if self.stage == "gameover":
                 self.button_draw(self.GAMEWINDOW, play_again_button)
+                self.button_draw(self.GAMEWINDOW, menu_button)
             elif self.stage == "game":
                 self.create_game()
+            elif self.stage == "menu":
+                self.create_menu()
             pygame.display.update()
         
                 
@@ -302,7 +314,7 @@ class hiddencats:
             #Gets the number of clicked  cats
             clicked_counter = len(self.clicked_cats)
             #Sets the counter text
-            self.text = self.font.render(f"{clicked_counter}/15", True, "red")
+            self.text = self.font.render(f"{clicked_counter}/15", True, self.button_color)
             #Draws the counter
             self.GAMEWINDOW.blit(self.text, (widthOffset, heightOffset))
             
