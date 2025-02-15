@@ -188,8 +188,8 @@ class hiddencats:
         #Dynamic centering
         centeredWidth = ( self.window_width / 2 ) - 100
         #Creates the buttons
-        button_start = self.create_button("GAME", (centeredWidth, 100, 200, 75), self.button_color, self.on_click_start_game)
-        button_options = self.create_button("OPTIONS", (centeredWidth - 50, 200, 300, 75), self.button_color, self.on_click_options)
+        button_start = self.create_button("GAME", (centeredWidth, 200, 200, 75), self.button_color, self.on_click_start_game)
+        button_options = self.create_button("OPTIONS", (centeredWidth - 50, 300, 300, 75), self.button_color, self.on_click_options)
         return [button_start, button_options]
     
     def initialize_game_buttons(self):
@@ -217,13 +217,14 @@ class hiddencats:
         #Dynamic centering
         centeredWidth = self.window_width - 170
         #Positioning  for the sound button
-        soundWidthOffset = self.window_width/2
-        soundHeightOffset = 100
+        soundWidthOffset = self.window_width/2 + 100
+        soundHeightOffset = 200
         
         #Creates the menu button
         button_menu =  self.create_button("Menu", (centeredWidth, 30, 150, 75), self.button_color, self.on_click_menu)
         button_sounds = self.create_button("", (soundWidthOffset, soundHeightOffset, 50, 50), self.button_color, self.set_sounds)
         return button_menu, button_sounds
+    
     def create_options(self):
         
         #Setup the menu button
@@ -232,13 +233,20 @@ class hiddencats:
         
         
         while True:   
-            
-            textWidthOffset = self.window_width/2- 330
-            textHeightOffset = 100
-            buttonWidthOffset = self.window_width/2
-            buttonHeightOffset = 100
+            #Positions for the page title
+            titleWidthOffset = self.window_width/2- 130
+            titleHeightOffset = 100
+            titleFont = pygame.font.Font(None, 100)
+            #Positions for the settings text
+            textWidthOffset = self.window_width/2- 230
+            textHeightOffset = 200
+            buttonWidthOffset = self.window_width/2+100
+            buttonHeightOffset = 200
             #Draw the rectangle behind counter
             pygame.draw.rect(self.GAMEWINDOW, "white", (buttonWidthOffset, buttonHeightOffset, 140, 50))
+            #Display title 
+            self.text = titleFont.render(f"Settings", True, self.button_color)
+            self.GAMEWINDOW.blit(self.text, (titleWidthOffset, titleHeightOffset))
             #Sets the counter text
             self.text = self.font.render(f"Cat sounds", True, self.button_color)
             #Draws the counter
@@ -264,7 +272,12 @@ class hiddencats:
                     self.create_collision_boxes(event.w, event.h)
 
             #If stage == menu draws the buttons 
-
+            
+            self.GAMEWINDOW.fill("white")
+            self.text = titleFont.render(f"Settings", True, self.button_color)
+            self.GAMEWINDOW.blit(self.text, (titleWidthOffset, titleHeightOffset))
+            self.text = self.font.render(f"Cat sounds", True, self.button_color)
+            self.GAMEWINDOW.blit(self.text, (textWidthOffset, textHeightOffset))
             
             if self.stage == "options":
                 self.button_draw(self.GAMEWINDOW, button_menu)
@@ -282,6 +295,16 @@ class hiddencats:
         #Setup the buttons
         button_start, button_options = self.initialize_menu_buttons()
         while True:   
+            titleWidthOffset = self.window_width/2- 430
+            titleHeightOffset = 100
+            titleFont = pygame.font.Font(None, 100)
+            self.text = titleFont.render(f"15 Hidden cats on Prosek", True, self.button_color)
+            self.GAMEWINDOW.blit(self.text, (titleWidthOffset, titleHeightOffset))
+            
+
+
+
+
             #Checks for quiting the game
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
@@ -302,6 +325,7 @@ class hiddencats:
 
             #If stage == menu draws the buttons 
             self.GAMEWINDOW.fill("white")
+            self.GAMEWINDOW.blit(self.text, (titleWidthOffset, titleHeightOffset))
             if self.stage == "menu":
                 self.button_draw(self.GAMEWINDOW, button_start)
                 self.button_draw(self.GAMEWINDOW, button_options)
