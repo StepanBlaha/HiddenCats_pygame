@@ -63,7 +63,12 @@ class hiddencats:
         self.text = ""
         self.stage =  "menu"
         
+        self.sound_switch  = False
+        self.sound_switch_button_style = 5
+        
     def play_sound(self):
+        if not self.sound_switch:
+            return
         random_index = random.randint(0, len(self.cat_sound_list) - 1)
         print(random_index)
         random_sound = self.cat_sound_list[random_index]
@@ -118,7 +123,7 @@ class hiddencats:
             if hover and action:
                 action()
         
-    def button_draw(self, screen, info):
+    def button_draw(self, screen, info, width = 0):
         """
         Draws a button on the screen.
         
@@ -129,7 +134,7 @@ class hiddencats:
         #Get the button info
         button_text, text_rect, button_rect, color, action, hover = info
         #Draw the button
-        pygame.draw.rect(self.GAMEWINDOW, color, button_rect , 0, 5)
+        pygame.draw.rect(self.GAMEWINDOW, color, button_rect , width, 5)
         #Draw the text into the button
         self.GAMEWINDOW.blit(button_text, text_rect)
         
@@ -166,6 +171,13 @@ class hiddencats:
         self.stage = "gameover"
         print("Game won")
         
+    def set_sounds(self):
+        self.sound_switch = not (self.sound_switch)
+        if not self.sound_switch:
+            self.sound_switch_button_style = 5
+        else:
+            self.sound_switch_button_style = 0
+        
     def initialize_menu_buttons(self):
         """
         Creates and returns menu buttons.
@@ -201,6 +213,68 @@ class hiddencats:
         menu_button = self.create_button("Menu", (centeredWidth, 400, 200, 75), self.button_color, self.on_click_menu)
         return [ play_again_button, menu_button ]
         
+    def initialize_options_buttons(self):
+        #Dynamic centering
+        centeredWidth = self.window_width - 170
+        #Positioning  for the sound button
+        soundWidthOffset = self.window_width/2
+        soundHeightOffset = 100
+        
+        #Creates the menu button
+        button_menu =  self.create_button("Menu", (centeredWidth, 30, 150, 75), self.button_color, self.on_click_menu)
+        button_sounds = self.create_button("", (soundWidthOffset, soundHeightOffset, 50, 50), self.button_color, self.set_sounds)
+        return button_menu, button_sounds
+    def create_options(self):
+        
+        #Setup the menu button
+        button_menu, button_sounds = self.initialize_options_buttons()
+        
+        
+        
+        while True:   
+            
+            textWidthOffset = self.window_width/2- 330
+            textHeightOffset = 100
+            buttonWidthOffset = self.window_width/2
+            buttonHeightOffset = 100
+            #Draw the rectangle behind counter
+            pygame.draw.rect(self.GAMEWINDOW, "white", (buttonWidthOffset, buttonHeightOffset, 140, 50))
+            #Sets the counter text
+            self.text = self.font.render(f"Cat sounds", True, self.button_color)
+            #Draws the counter
+            self.GAMEWINDOW.blit(self.text, (textWidthOffset, textHeightOffset))
+            
+            
+            #Checks for quiting the game
+            for event in pygame.event.get(): 
+                if event.type == pygame.QUIT: 
+                    pygame.quit()
+                    #For exiting the window
+                    sys.exit()
+                
+                #If stage == menu checks for colisions with the buttons
+                if self.stage == "options":
+                    self.button_check(button_menu, event)
+                    self.button_check(button_sounds, event)
+                    
+                #Check for resize
+                if event.type == pygame.VIDEORESIZE:
+                    button_menu, button_sounds = self.initialize_options_buttons()
+                    self.create_window(event.w, event.h)
+                    self.create_collision_boxes(event.w, event.h)
+
+            #If stage == menu draws the buttons 
+
+            
+            if self.stage == "options":
+                self.button_draw(self.GAMEWINDOW, button_menu)
+                self.button_draw(self.GAMEWINDOW, button_sounds, self.sound_switch_button_style)
+                
+            #If stage is changed to game, draws the game
+            elif self.stage == "menu":
+                self.create_menu()
+            pygame.display.update() 
+        
     def create_menu(self):
         """
         Creates and runs the menu screen, handling events and rendering buttons.
@@ -235,6 +309,9 @@ class hiddencats:
             #If stage is changed to game, draws the game
             elif self.stage == "game":
                 self.create_game()
+                
+            elif self.stage == "options":
+                self.create_options()
             pygame.display.update() 
     
     def create_win_screen(self):
@@ -376,6 +453,8 @@ class hiddencats:
             self.create_game()
         elif self.stage  == "gameover":
             self.create_win_screen()
+        elif self.stage == "options":
+            self.create_options()
         
         
         
