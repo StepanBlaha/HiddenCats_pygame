@@ -1,6 +1,7 @@
 #pip install pygame
 import random
 import  os
+import datetime
 import pygame, sys
 
 class hiddencats:
@@ -65,6 +66,7 @@ class hiddencats:
         
         self.sound_switch  = False
         self.sound_switch_button_style = 5
+        self.seconds_counter = 0
         
     def play_sound(self):
         if not self.sound_switch:
@@ -332,6 +334,7 @@ class hiddencats:
                 
             #If stage is changed to game, draws the game
             elif self.stage == "game":
+                self.start_ticks = pygame.time.get_ticks()
                 self.create_game()
                 
             elif self.stage == "options":
@@ -357,6 +360,12 @@ class hiddencats:
         centeredWidth = ( self.window_width / 2 ) - 200
         win_text = win_font.render(f"You won", True, self.button_color)
         self.GAMEWINDOW.blit(win_text, (centeredWidth, 150))
+        
+        time_text = self.font.render(str(datetime.timedelta(seconds = self.seconds_counter)), True, "black")
+        #pygame.draw.rect(self.GAMEWINDOW, "black", (( self.window_width / 2 ) - 115, 525, 230, 90))
+        self.GAMEWINDOW.blit(time_text, (( self.window_width / 2 ) - 90, 500))
+        #predtim 550
+        
         while True:
             for event in pygame.event.get(): 
                 if event.type == pygame.QUIT: 
@@ -410,7 +419,14 @@ class hiddencats:
         self.create_collision_boxes(self.window_width, self.window_height)
         self.create_window(self.window_width, self.window_height)
         self.create_collision_boxes(self.window_width, self.window_height)
+        
+        #Timer setup
+        timer_interval = 1000
+        timer_event = pygame.USEREVENT + 1 
+        pygame.time.set_timer(timer_event, timer_interval)
+        
         while True:
+
             #Offsets for centering the counter
             widthOffset = self.window_width - 330
             heightOffset = 50
@@ -423,6 +439,11 @@ class hiddencats:
             #Draws the counter
             self.GAMEWINDOW.blit(self.text, (widthOffset, heightOffset))
             
+            #Draw timer
+            time_text = self.font.render(str(datetime.timedelta(seconds = self.seconds_counter)), True, self.button_color)
+            pygame.draw.rect(self.GAMEWINDOW, "white", (self.window_width - 250, self.window_height - 120, 250, 80))
+            self.GAMEWINDOW.blit(time_text, (self.window_width - 230, self.window_height - 100))
+            
             if clicked_counter == 15:
                 self.on_game_win()
                
@@ -432,6 +453,11 @@ class hiddencats:
                     pygame.quit()
                     #For exiting the window
                     sys.exit()
+                
+                elif event.type == timer_event:
+                    self.seconds_counter +=1
+                    time = str(datetime.timedelta(seconds = self.seconds_counter))
+                    print(time)
                 
                 #If stage == game checks for colisions with the menu button
                 if self.stage == "game":
