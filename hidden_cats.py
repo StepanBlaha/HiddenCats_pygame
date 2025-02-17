@@ -342,7 +342,9 @@ class hiddencats:
             pygame.display.update() 
     
     def create_win_screen(self):
-        
+        """
+        Creates and runs the win screen, handling events and rendering buttons.
+        """
         self.clicked_cats = []
         surface = pygame.Surface((self.window_width, self.window_height))
         surface.set_alpha(180)
